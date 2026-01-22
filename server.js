@@ -6,18 +6,30 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const admin = require('firebase-admin');
+const path = require('path');
 
 // Firebase Admin Setup
 try {
-    const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || './config/firebase-service-account.json';
-    const fs = require('fs');
-    if (fs.existsSync(serviceAccountPath)) {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        // Option 1: Initialize using an environment variable containing the JSON string
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         admin.initializeApp({
-            credential: admin.credential.cert(require(serviceAccountPath))
+            credential: admin.credential.cert(serviceAccount)
         });
-        console.log('Firebase Admin initialized from file');
+        console.log('Firebase Admin initialized from environment variable');
     } else {
-        console.log('Firebase service account file not found, skipping initialization');
+        // Option 2: Initialize using a secret file
+        const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || path.join(__dirname, 'config', 'firebase-service-account.json');
+        const fs = require('fs');
+
+        if (fs.existsSync(serviceAccountPath)) {
+            admin.initializeApp({
+                credential: admin.credential.cert(require(serviceAccountPath))
+            });
+            console.log('Firebase Admin initialized from file:', serviceAccountPath);
+        } else {
+            console.log('Firebase service account not found. Notifications will be disabled. Check FIREBASE_SERVICE_ACCOUNT env var or file at:', serviceAccountPath);
+        }
     }
 } catch (error) {
     console.error('Error initializing Firebase Admin:', error);

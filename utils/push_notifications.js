@@ -3,6 +3,11 @@ const User = require('../models/User');
 
 const sendPushNotification = async (userId, title, body, data = {}) => {
     try {
+        if (admin.apps.length === 0) {
+            console.log('Firebase Admin not initialized. Skipping notification for user:', userId);
+            return false;
+        }
+
         const user = await User.findOne({ uid: userId });
 
         if (!user || !user.fcmToken) {
