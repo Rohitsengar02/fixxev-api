@@ -14,6 +14,7 @@ const FranchiseSchema = new mongoose.Schema({
     password: { type: String }, // Optional for Google Sign-In
     googleId: { type: String }, // For Google Sign-In
     mobile: { type: String },
+    fcmToken: { type: String, default: null },
     address: { type: String },
     latitude: { type: Number, default: 0.0 },
     longitude: { type: Number, default: 0.0 },

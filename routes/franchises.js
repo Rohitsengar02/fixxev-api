@@ -104,6 +104,27 @@ router.delete('/:id', async (req, res) => {
 
 // --- Franchise App Endpoints ---
 
+router.post('/fcm-token', async (req, res) => {
+    try {
+        const { franchiseId, fcmToken } = req.body;
+        if (!franchiseId || !fcmToken) {
+            return res.status(400).json({ message: 'FranchiseId and FCM Token are required' });
+        }
+        const franchise = await Franchise.findByIdAndUpdate(
+            franchiseId,
+            { fcmToken, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!franchise) {
+            return res.status(404).json({ message: 'Franchise not found' });
+        }
+        res.json({ message: 'FCM Token updated', franchise });
+    } catch (err) {
+        console.error('Franchise FCM Token Update Error:', err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // Register / Onboarding
 router.post('/register', async (req, res) => {
     try {

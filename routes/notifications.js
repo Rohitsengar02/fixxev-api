@@ -106,6 +106,16 @@ router.post('/', async (req, res) => {
             }
         }
 
+        // Send FCM Push Notification
+        const { sendPushNotification } = require('../utils/push_notifications');
+        sendPushNotification(
+            notification.recipientId,
+            notification.title,
+            notification.message,
+            notification.data || {},
+            notification.recipientType
+        );
+
         res.status(201).json(notification);
     } catch (error) {
         res.status(500).json({ message: 'Failed to create notification', error: error.message });

@@ -85,7 +85,17 @@ router.post('/', async (req, res) => {
             userId,
             'Booking Confirmed',
             `Your booking #${booking.bookingId} has been created successfully.`,
-            { bookingId: booking.bookingId, type: 'booking_created' }
+            { bookingId: booking.bookingId, type: 'booking_created' },
+            'user'
+        );
+
+        // Send Push Notification to Franchise
+        sendPushNotification(
+            franchiseId,
+            'New Booking Received',
+            `New booking #${booking.bookingId} from ${userDetails?.name || 'Customer'}`,
+            { bookingId: booking.bookingId, type: 'booking_created' },
+            'franchise'
         );
 
         res.status(201).json(booking);
@@ -213,7 +223,8 @@ router.put('/:id/status', async (req, res) => {
                 bookingId: booking.bookingId,
                 type: 'booking_update',
                 status: booking.status
-            }
+            },
+            'user'
         );
 
         res.json(booking);
