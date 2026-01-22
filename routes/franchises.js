@@ -24,6 +24,16 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get all approved franchises for the user app
+router.get('/all', async (req, res) => {
+    try {
+        const franchises = await Franchise.find({ status: { $in: ['Approved', 'Active'] } }).select('-password');
+        res.json(franchises);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Create a new franchise (Admin adding a franchise)
 router.post('/', async (req, res) => {
     const { name, ownerName, email, password, location, technicianCount, status } = req.body;
