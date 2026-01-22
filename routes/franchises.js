@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 // Get all approved franchises for the user app
 router.get('/all', async (req, res) => {
     try {
-        const franchises = await Franchise.find({ status: { $in: ['Approved', 'Active'] } }).select('-password');
+        const franchises = await Franchise.find({ status: { $in: ['Approved', 'Active'] } }).populate('services').select('-password');
         res.json(franchises);
     } catch (err) {
         res.status(500).json({ message: err.message });
