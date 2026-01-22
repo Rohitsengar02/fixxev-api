@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
+const { sendPushNotification } = require('../utils/push_notifications');
 
 // Create new booking
 router.post('/', async (req, res) => {
@@ -78,6 +79,14 @@ router.post('/', async (req, res) => {
             io.to(`franchise_${franchiseId}`).emit('notification', notifications[1]);
             io.to('admin').emit('notification', notifications[2]);
         }
+
+        // Send Push Notification to User
+        sendPushNotification(
+            userId,
+            'Booking Confirmed',
+            `Your booking #${booking.bookingId} has been created successfully.`,
+            { bookingId: booking.bookingId, type: 'booking_created' }
+        );
 
         res.status(201).json(booking);
     } catch (error) {
@@ -196,31 +205,16 @@ router.put('/:id/status', async (req, res) => {
         }
 
         // Send FCM Push Notification
-        try {
-            const User = require('../models/User');
-            const admin = require('firebase-admin');
-            const user = await User.findOne({ uid: booking.userId });
-
-            if (user && user.fcmToken) {
-                const message = {
-                    notification: {
-                        title: notification.title,
-                        body: notification.message,
-                    },
-                    token: user.fcmToken,
-                    data: {
-                        bookingId: booking.bookingId,
-                        type: 'booking_update',
-                        click_action: 'FLUTTER_NOTIFICATION_CLICK'
-                    }
-                };
-
-                await admin.messaging().send(message);
-                console.log(`FCM notification sent to ${user.email} for booking ${booking.bookingId}`);
+        sendPushNotification(
+            booking.userId,
+            notification.title,
+            notification.message,
+            {
+                bookingId: booking.bookingId,
+                type: 'booking_update',
+                status: booking.status
             }
-        } catch (fcmError) {
-            console.error('Error sending FCM notification:', fcmError);
-        }
+        );
 
         res.json(booking);
     } catch (error) {

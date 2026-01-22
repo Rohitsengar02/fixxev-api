@@ -5,6 +5,23 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const admin = require('firebase-admin');
+
+// Firebase Admin Setup
+try {
+    const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || './config/firebase-service-account.json';
+    const fs = require('fs');
+    if (fs.existsSync(serviceAccountPath)) {
+        admin.initializeApp({
+            credential: admin.credential.cert(require(serviceAccountPath))
+        });
+        console.log('Firebase Admin initialized from file');
+    } else {
+        console.log('Firebase service account file not found, skipping initialization');
+    }
+} catch (error) {
+    console.error('Error initializing Firebase Admin:', error);
+}
 
 const app = express();
 const server = http.createServer(app);

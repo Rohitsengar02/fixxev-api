@@ -276,4 +276,32 @@ router.get('/dashboard/:uid', async (req, res) => {
     }
 });
 
+// @route   POST api/users/fcm-token
+// @desc    Update FCM Token for a user
+// @access  Public
+router.post('/fcm-token', async (req, res) => {
+    try {
+        const { userId, fcmToken } = req.body;
+
+        if (!userId || !fcmToken) {
+            return res.status(400).json({ message: 'UserId and FCM Token are required' });
+        }
+
+        const user = await User.findOneAndUpdate(
+            { uid: userId },
+            { fcmToken, updatedAt: Date.now() },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'FCM Token updated', user });
+    } catch (err) {
+        console.error('FCM Token Update Error:', err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;
